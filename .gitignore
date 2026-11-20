@@ -1,11 +1,42 @@
+# Dependencies
 node_modules/
+medical-ai-frontend/node_modules/
+
+# Python Virtual Environments & Bytecode
+venv/
+.venv/
+env/
+medical-ai-backend-fastapi/venv/
+__pycache__/
+*.py[cod]
+medical-ai-backend-fastapi/__pycache__/
+
+# Production builds
 dist/
 build/
+medical-ai-frontend/dist/
 
+# Environment files
 .env
 .env.*
+!.env.example
+medical-ai-backend-fastapi/.env
+medical-ai-backend-fastapi/.env.*
+!medical-ai-backend-fastapi/.env.example
 
-medical-ai-frontend/node_modules/
-medical-ai-backend/node_modules/
+# Logs and runtime artifacts
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-medical-ai-backend/uploads/
+# Uploads & temporary files
+uploads/
+medical-ai-backend-fastapi/uploads/
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

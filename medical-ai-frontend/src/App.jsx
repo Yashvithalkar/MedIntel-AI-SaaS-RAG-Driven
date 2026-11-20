@@ -21,84 +21,67 @@
 //   → ProtectedRoute checks auth: logged in? correct role?
 //   → Yes: renders PatientPortal
 //   → No: redirects to /login or /doctor/dashboard
-//
-// PUBLIC vs PROTECTED ROUTES:
-//   Public:    No auth check. Anyone can visit.
-//              /login, /register
-//
-//   Protected: Wrapped in <ProtectedRoute>.
-//              Checks auth state before rendering.
-//              /patient/portal, /doctor/dashboard
-//
-// REDIRECT FOR LOGGED-IN USERS ON PUBLIC ROUTES:
-//   If a logged-in patient visits /login, we redirect them to /patient/portal.
-//   This is handled in PublicRoute component below.
 // ==============================================================
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Pages
-import Login          from './pages/Login'
-import Register       from './pages/Register'
-import PatientPortal  from './pages/PatientPortal'
-import DoctorDashboard from './pages/DoctorDashboard'
+import Login from './pages/Login';
+import Register from './pages/Register';
+import PatientPortal from './pages/PatientPortal';
+import DoctorDashboard from './pages/DoctorDashboard';
 
 // Components
-import ProtectedRoute from './components/ProtectedRoute'
+import ProtectedRoute from './components/ProtectedRoute';
 
 // ================================================================
 // PublicRoute — Redirect logged-in users away from auth pages
 // ================================================================
-// If a user is already logged in and tries to visit /login or /register,
-// redirect them to their dashboard instead of showing the login form.
-//
-// Without this: logged-in users can navigate to /login which is confusing
-// With this: they're automatically sent to their correct dashboard
 const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
 
-  // Still checking session — show nothing (brief flicker if we show login)
+  // Still checking session — show Bootstrap spinner centered
   if (loading) {
     return (
-      <div className="loading-screen">
-        <div className="spinner" />
+      <div className="min-vh-100 w-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-muted mt-3 fw-semibold">Loading MediAI Care...</p>
+        </div>
       </div>
-    )
+    );
   }
 
-  // Already logged in → redirect to their dashboard
+  // Already logged in → redirect to their respective dashboard
   if (user) {
     const dashboards = {
       patient: '/patient/portal',
-      doctor:  '/doctor/dashboard',
-      admin:   '/admin/dashboard',
-    }
-    return <Navigate to={dashboards[user.role] || '/'} replace />
+      doctor: '/doctor/dashboard',
+      admin: '/admin/dashboard',
+    };
+    return <Navigate to={dashboards[user.role] || '/'} replace />;
   }
 
-  // Not logged in → show the login/register page
-  return children
-}
+  // Not logged in → show the public login/register page
+  return children;
+};
 
 // ================================================================
-// App — Root component
+// App — Root Component
 // ================================================================
 const App = () => {
   return (
-    // AuthProvider MUST wrap BrowserRouter so that ProtectedRoute
-    // and PublicRoute can access auth state via useAuth()
     <AuthProvider>
       <BrowserRouter>
         <Routes>
 
           {/* ── Root redirect ── */}
-          {/* Visiting / redirects to /login */}
-          {/* ProtectedRoute or PublicRoute then handles login → dashboard */}
           <Route path="/" element={<Navigate to="/login" replace />} />
 
           {/* ── Public routes ── */}
-          {/* Redirect to dashboard if already logged in */}
           <Route
             path="/login"
             element={
@@ -117,9 +100,6 @@ const App = () => {
           />
 
           {/* ── Protected: Patient only ── */}
-          {/* allowedRole="patient" means only patients can access */}
-          {/* Doctors get redirected to /doctor/dashboard */}
-          {/* Unauthenticated users get redirected to /login */}
           <Route
             path="/patient/portal"
             element={
@@ -140,14 +120,20 @@ const App = () => {
           />
 
           {/* ── 404 Not Found ── */}
-          {/* Catches any URL not matched above */}
           <Route
             path="*"
             element={
-              <div className="loading-screen" style={{ flexDirection: 'column', gap: '1rem' }}>
-                <h1 style={{ fontSize: '3rem', color: '#667eea' }}>404</h1>
-                <p style={{ color: '#718096' }}>Page not found</p>
-                <a href="/login" style={{ color: '#667eea' }}>← Go to login</a>
+              <div className="min-vh-100 w-100 d-flex align-items-center justify-content-center bg-light p-4">
+                <div className="text-center bg-white p-5 rounded-4 shadow-lg border-0" style={{ maxWidth: '450px' }}>
+                  <h1 className="display-1 fw-bold text-primary mb-0">404</h1>
+                  <h4 className="fw-bold text-dark mt-2 mb-3">Page Not Found</h4>
+                  <p className="text-secondary mb-4">
+                    The page you are looking for doesn't exist or has been moved.
+                  </p>
+                  <Link to="/login" className="btn btn-primary btn-lg rounded-3 fw-semibold px-4 shadow-sm">
+                    ← Back to Login
+                  </Link>
+                </div>
               </div>
             }
           />
@@ -155,7 +141,7 @@ const App = () => {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;
